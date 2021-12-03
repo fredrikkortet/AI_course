@@ -240,7 +240,7 @@ makeandplot(_map_,"srand")
 #_map_,info = generateMap2d_obstacle([60,60])
 #print(makeandplot(_map_,"A*new",info))
 
-for i in range(1):
+for i in range(20):
     _map_,info = generateMap2d_obstacle([60, 60])
     srand=mkpath(_map_,"srand")
     dfs=mkpath(_map_,"DFS")
@@ -249,14 +249,7 @@ for i in range(1):
     astarE=mkpath(_map_,"A*E")
     astarM=mkpath(_map_,"A*M")
     astarN=mkpath(_map_,"A*new",info)
-    #makeandplot(_map_,"A*new",info)
-    print("R:",srand)
-    print("D:",dfs)
-    print("B",bfs)
-    print("G:",greedy)
-    print("E:",astarE)
-    print("M:",astarM)
-    print("N:",astarN)
+    print("Random",srand," DFS",dfs," BFS",bfs," Greedy",greedy," Ecluidean",astarE," Manhattan",astarM," New",astarN)
     print("--------")
 
 
