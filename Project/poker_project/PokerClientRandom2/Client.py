@@ -1,5 +1,8 @@
+from collections import defaultdict
 import socket
 import random
+from types import ClassMethodDescriptorType
+from typing import DefaultDict
 import ClientBase
 
 # IP address and port
@@ -8,8 +11,14 @@ TCP_PORT = 5000
 BUFFER_SIZE = 1024
 
 # Agent
-POKER_CLIENT_NAME = 'Random1'
+POKER_CLIENT_NAME = 'Reflex1'
 CURRENT_HAND = []
+
+Ranks =['2','3','4','5','6','7','8','9','T','J','Q','K','A']
+
+Suits =['s','h','d','c']
+
+Hands=['High card','Pair','Two pair', 'Three of a kind','Straight','Flush','Full house','Four of a kind','Straight flush']
 
 class pokerGames(object):
     def __init__(self):
@@ -19,6 +28,61 @@ class pokerGames(object):
         self.Ante = 0
         self.playersCurrentBet = 0
 
+def ranks_order(card):
+    return Ranks.index(card[0])
+
+def evaluate_cards(cards):
+    validhands=[]
+    temprank=[]
+    tempsuit=[]
+    tempdictrank=defaultdict(lambda:0)
+    for i in cards:
+        temprank.append(i[0])
+        tempsuit.append(i[1])
+    for i in temprank:
+        tempdictrank[i]+=1
+    x=sorted(tempdictrank.values())
+    if 2 in tempdictrank:
+        validhands.append(Hands[1])
+        print(Hands[1])
+    if x==[1,2,2]:
+        validhands.append(Hands[2])
+        print(Hands[2])
+    if x==[1,1,3] or x==[2,3]:
+        validhands.append(Hands[3])
+        print(Hands[3])
+    if x==[1,1,1,1,1]:
+        value=[]
+        for i in temprank:
+            value.append(i)
+        if max(value)-min(value)==4:
+            validhands.append(Hands[4])
+            print(Hands[4])
+        else:
+            if set(value) == set(['A','2','3','4','5']):
+                validhands.append(Hands[4])
+                print(Hands[4],'with A')
+    if len(tempsuit)==1:
+        validhands.append(Hands[5])
+        print(Hands[5])
+    if x==[2,3]:
+        validhands.append(Hands[6])
+        print(Hands[6])
+    if x==[1,4]:
+        validhands.append(Hands[7])
+        print(Hands[7])
+    if 5 in validhands:
+        if 4 in validhands:
+            validhands.append(Hands[8])
+            print(Hands[8])
+    return validhands
+
+def card_strength(cards):
+    sorted_cards= sorted(cards,key=ranks_order)
+    evalu_cards=evaluate_cards(cards)
+    Highest_card=13
+    #some way to calculate the strangth
+    pass
 '''
 * Gets the name of the player.
 * @return  The name of the player as a single word without space. <code>null</code> is not a valid answer.
