@@ -19,6 +19,7 @@ Ranks =['2','3','4','5','6','7','8','9','T','J','Q','K','A']
 Suits =['s','h','d','c']
 
 Hands=['High card','Pair','Two pair', 'Three of a kind','Straight','Flush','Full house','Four of a kind','Straight flush']
+highest_strength=[28561,57122,85683,114244,142805,171366,199927,228488,257049]
 
 class pokerGames(object):
     def __init__(self):
@@ -32,7 +33,7 @@ def ranks_order(card):
     return Ranks.index(card[0])
 
 def evaluate_cards(cards):
-    validhands=[]
+    validhands=['High card']
     temprank=[]
     tempsuit=[]
     tempdictrank=defaultdict(lambda:0)
@@ -75,14 +76,24 @@ def evaluate_cards(cards):
         if 4 in validhands:
             validhands.append(Hands[8])
             print(Hands[8])
-    return validhands
+    return validhands.pop(len(validhands)-1)
 
 def card_strength(cards):
     sorted_cards= sorted(cards,key=ranks_order)
     evalu_cards=evaluate_cards(cards)
-    Highest_card=13
-    #some way to calculate the strangth
-    pass
+    strength=0
+    calc_strength=[]
+    calc_strength.append(pow(sorted_cards[4],4))
+    for i in range(0,7):
+        calc_strength.append(calc_strength[i]+pow(sorted_cards[4],4))
+
+    strength=calc_strength[Hands.index(evalu_cards)]/highest_strength[Hands.index(evalu_cards)]
+    return strength
+
+def winning(cards):
+    strength=card_strength(cards)
+    print(strength)
+    return strength
 '''
 * Gets the name of the player.
 * @return  The name of the player as a single word without space. <code>null</code> is not a valid answer.
@@ -111,17 +122,12 @@ def queryOpenAction(_minimumPotAfterOpen, _playersCurrentBet, _playersRemainingC
     print("Player requested to choose an opening action.")
 
     # Random Open Action
-    def chooseOpenOrCheck():
-        if _playersCurrentBet + _playersRemainingChips > _minimumPotAfterOpen:
-            #return ClientBase.BettingAnswer.ACTION_OPEN,  iOpenBet
-            return ClientBase.BettingAnswer.ACTION_OPEN,  (random.randint(0, 10) + _minimumPotAfterOpen) if _playersCurrentBet + _playersRemainingChips + 10> _minimumPotAfterOpen else _minimumPotAfterOpen
-        else:
-            return ClientBase.BettingAnswer.ACTION_CHECK
-
-    return {
-        0: ClientBase.BettingAnswer.ACTION_CHECK,
-        1: ClientBase.BettingAnswer.ACTION_CHECK,
-    }.get(random.randint(0, 2), chooseOpenOrCheck())
+    if winning(CURRENT_HAND)>0.5 and _playersCurrentBet + _playersRemainingChips > _minimumPotAfterOpen:
+        return ClientBase.BettingAnswer.ACTION_OPEN,  (random.randint(0, 10) + _minimumPotAfterOpen)
+    elif winning(CURRENT_HAND)<0.5 and _playersCurrentBet + _playersRemainingChips > _minimumPotAfterOpen:
+        return ClientBase.BettingAnswer.ACTION_OPEN, _minimumPotAfterOpen
+    else:
+        return ClientBase.BettingAnswer.ACTION_CHECK
 
 '''
 * Modify queryCallRaiseAction() and add your strategy here
