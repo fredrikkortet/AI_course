@@ -11,15 +11,17 @@ TCP_PORT = 5000
 BUFFER_SIZE = 1024
 
 # Agent
-POKER_CLIENT_NAME = 'Reflex1'
+POKER_CLIENT_NAME = 'Reflex'
 CURRENT_HAND = []
 
-Ranks =['2','3','4','5','6','7','8','9','T','J','Q','K','A']
+Ranks = ['3', '2', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
 
-Suits =['s','h','d','c']
+Suits = ['s', 'h', 'd', 'c']
 
-Hands=['High card','Pair','Two pair', 'Three of a kind','Straight','Flush','Full house','Four of a kind','Straight flush']
-highest_strength=[28561,57122,85683,114244,142805,171366,199927,228488,257049]
+Hands = ['High card', 'Pair', 'Two pair', 'Three of a kind', 'Straight', 'Flush', 'Full house', 'Four of a kind',
+         'Straight flush']
+highest_strength = [0.501, 0.422, 0.047, 0.021, 0.003, 0.001, 0.001, 0.0, 0.0]
+
 
 class pokerGames(object):
     def __init__(self):
@@ -29,81 +31,89 @@ class pokerGames(object):
         self.Ante = 0
         self.playersCurrentBet = 0
 
+
 def ranks_order(card):
     return Ranks.index(card[0])
 
+def change_card(cards):
+    sorted_crads=sorted(cards,key=ranks_order)
+    ev_card=evaluate_cards(cards)
+    if Hands.index(ev_card) <=2:
+        return ''
+    if Hands.index(ev_card)==1:
+        throw=' '+cards[0]+cards[1]+cards[2]
+        return throw
+    return
+
 def evaluate_cards(cards):
-    validhands=['High card']
-    temprank=[]
-    tempsuit=[]
-    tempdictrank=defaultdict(lambda:0)
+    validhands = ['High card']
+    temprank = []
+    tempsuit = []
+    tempdictrank = defaultdict(lambda: 0)
     for i in cards:
         temprank.append(i[0])
         tempsuit.append(i[1])
     for i in temprank:
-        tempdictrank[i]+=1
-    x=sorted(tempdictrank.values())
-    if 2 in tempdictrank:
+        tempdictrank[i] += 1
+    x = sorted(tempdictrank.values())
+    if [1, 1, 1, 2] == x:
         validhands.append(Hands[1])
         print(Hands[1])
-    if x==[1,2,2]:
+    if x == [1, 2, 2]:
         validhands.append(Hands[2])
         print(Hands[2])
-    if x==[1,1,3] or x==[2,3]:
+    if x == [1, 1, 3]:
         validhands.append(Hands[3])
         print(Hands[3])
-    if x==[1,1,1,1,1]:
-        value=[]
+    if x == [1, 1, 1, 1, 1]:
+        value = []
         for i in cards:
             value.append(ranks_order(i))
-        if max(value)-min(value)==4:
+        if max(value) - min(value) == 4:
             validhands.append(Hands[4])
             print(Hands[4])
         else:
-            if set(value) == set(['A','2','3','4','5']):
+            if set(value) == set(['A', '2', '3', '4', '5']):
                 validhands.append(Hands[4])
-                print(Hands[4],'with A')
-    if len(tempsuit)==1:
+                print(Hands[4], 'with A')
+    if len(tempsuit) == 1:
         validhands.append(Hands[5])
         print(Hands[5])
-    if x==[2,3]:
+    if x == [2, 3]:
         validhands.append(Hands[6])
         print(Hands[6])
-    if x==[1,4]:
+    if x == [1, 4]:
         validhands.append(Hands[7])
         print(Hands[7])
     if 5 in validhands:
         if 4 in validhands:
             validhands.append(Hands[8])
             print(Hands[8])
-    return validhands.pop(len(validhands)-1)
+    return validhands.pop(len(validhands) - 1)
+
 
 def card_strength(cards):
-    sorted_cards= sorted(cards,key=ranks_order)
-    evalu_cards=evaluate_cards(cards)
-    strength=0
-    print(sorted_cards,"hej")
-    card=ranks_order(sorted_cards[0])
-    calc_strength=[]
-    calc_strength.append(pow(card,4))
-    for i in range(0,7):
-        calc_strength.append(calc_strength[i]+pow(card,4))
-
-    strength=calc_strength[Hands.index(evalu_cards)]/highest_strength[Hands.index(evalu_cards)]
+    evalu_cards = evaluate_cards(cards)
+    strength = 1 - highest_strength[Hands.index(evalu_cards)]
     return strength
+
 
 def winning(cards):
-    strength=card_strength(cards)
-    print(strength)
+    strength = card_strength(cards)
     return strength
+
+
 '''
 * Gets the name of the player.
 * @return  The name of the player as a single word without space. <code>null</code> is not a valid answer.
 '''
+
+
 def queryPlayerName(_name):
     if _name is None:
         _name = POKER_CLIENT_NAME
     return _name
+
 
 '''
 * Modify queryOpenAction() and add your strategy here
@@ -120,16 +130,21 @@ def queryPlayerName(_name):
 *                              and the players total amount of chips (the amount of chips alrady put into
 *                              pot plus the remaining amount of chips).
 '''
+
+
 def queryOpenAction(_minimumPotAfterOpen, _playersCurrentBet, _playersRemainingChips):
     print("Player requested to choose an opening action.")
 
+    winprob = winning(CURRENT_HAND)
     # Random Open Action
-    if winning(CURRENT_HAND)>0.5 and _playersCurrentBet + _playersRemainingChips > _minimumPotAfterOpen:
-        return ClientBase.BettingAnswer.ACTION_OPEN,  (random.randint(0, 10) + _minimumPotAfterOpen)
-    elif winning(CURRENT_HAND)<0.5 and _playersCurrentBet + _playersRemainingChips > _minimumPotAfterOpen:
+    print("här är jag i open")
+    if winprob > 0.5 and _playersCurrentBet + _playersRemainingChips > _minimumPotAfterOpen + 10:
+        return ClientBase.BettingAnswer.ACTION_OPEN, (random.randint(0, 10) + _minimumPotAfterOpen)
+    elif winprob > 0.5 and _playersCurrentBet + _playersRemainingChips > _minimumPotAfterOpen:
         return ClientBase.BettingAnswer.ACTION_OPEN, _minimumPotAfterOpen
     else:
         return ClientBase.BettingAnswer.ACTION_CHECK
+
 
 '''
 * Modify queryCallRaiseAction() and add your strategy here
@@ -150,20 +165,23 @@ def queryOpenAction(_minimumPotAfterOpen, _playersCurrentBet, _playersRemainingC
 *                                  puts into the pot and must be between <code>minimumAmountToRaiseTo</code> and
 *                                  <code>playersCurrentBet+playersRemainingChips</code>.
 '''
+
+
 def queryCallRaiseAction(_maximumBet, _minimumAmountToRaiseTo, _playersCurrentBet, _playersRemainingChips):
     print("Player requested to choose a call/raise action.")
-    # Random Open Action
-    def chooseRaiseOrFold():
-        if  _playersCurrentBet + _playersRemainingChips > _minimumAmountToRaiseTo:
-            return ClientBase.BettingAnswer.ACTION_RAISE,  (random.randint(0, 10) + _minimumAmountToRaiseTo) if _playersCurrentBet+ _playersRemainingChips + 10 > _minimumAmountToRaiseTo else _minimumAmountToRaiseTo
-        else:
-            return ClientBase.BettingAnswer.ACTION_FOLD
-    return {
-        0: ClientBase.BettingAnswer.ACTION_FOLD,
-        #1: ClientBase.BettingAnswer.ACTION_ALLIN,
-        1: ClientBase.BettingAnswer.ACTION_FOLD,
-        2: ClientBase.BettingAnswer.ACTION_CALL if _playersCurrentBet + _playersRemainingChips > _maximumBet else ClientBase.BettingAnswer.ACTION_FOLD
-    }.get(random.randint(0, 3), chooseRaiseOrFold())
+    winning_prob = winning(CURRENT_HAND)
+    print("money ", _playersCurrentBet + _playersRemainingChips)
+    print(CURRENT_HAND, " prob ", winning_prob)
+    print("to call ", _maximumBet)
+    print("to call", _minimumAmountToRaiseTo)
+    if winning_prob<0.5 and _maximumBet > _playersCurrentBet + _playersRemainingChips:
+        return ClientBase.BettingAnswer.ACTION_FOLD
+    if winning_prob > 0.9:
+        return ClientBase.BettingAnswer.ACTION_ALLIN
+    if winning_prob < 0.8 and _playersCurrentBet + _playersRemainingChips > _minimumAmountToRaiseTo:
+        return ClientBase.BettingAnswer.ACTION_RAISE, _minimumAmountToRaiseTo + random.randint(0,10)
+    return ClientBase.BettingAnswer.ACTION_CALL
+
 
 '''
 * Modify queryCardsToThrow() and add your strategy to throw cards
@@ -173,10 +191,13 @@ def queryCallRaiseAction(_maximumBet, _minimumAmountToRaiseTo, _playersCurrentBe
 *          or <code>null</code> or an empty array to keep all cards.
 * @see     #infoCardsInHand(ca.ualberta.cs.poker.Hand)
 '''
+
+
 def queryCardsToThrow(_hand):
     print("Requested information about what cards to throw")
     print(_hand)
     return _hand[random.randint(0,4)] + ' '
+
 
 # InfoFunction:
 
@@ -184,38 +205,52 @@ def queryCardsToThrow(_hand):
 * Called when a new round begins.
 * @param round the round number (increased for each new round).
 '''
+
+
 def infoNewRound(_round):
-    #_nrTimeRaised = 0
-    print('Starting Round: ' + _round )
+    # _nrTimeRaised = 0
+    print('Starting Round: ' + _round)
+
 
 '''
 * Called when the poker server informs that the game is completed.
 '''
+
+
 def infoGameOver():
     print('The game is over.')
+
 
 '''
 * Called when the server informs the players how many chips a player has.
 * @param playerName    the name of a player.
 * @param chips         the amount of chips the player has.
 '''
+
+
 def infoPlayerChips(_playerName, _chips):
     print('The player ' + _playerName + ' has ' + _chips + 'chips')
+
 
 '''
 * Called when the ante has changed.
 * @param ante  the new value of the ante.
 '''
+
+
 def infoAnteChanged(_ante):
     print('The ante is: ' + _ante)
+
 
 '''
 * Called when a player had to do a forced bet (putting the ante in the pot).
 * @param playerName    the name of the player forced to do the bet.
 * @param forcedBet     the number of chips forced to bet.
 '''
+
+
 def infoForcedBet(_playerName, _forcedBet):
-    print("Player "+ _playerName +" made a forced bet of "+ _forcedBet + " chips.")
+    print("Player " + _playerName + " made a forced bet of " + _forcedBet + " chips.")
 
 
 '''
@@ -223,70 +258,98 @@ def infoForcedBet(_playerName, _forcedBet):
 * @param playerName        the name of the player that opens.
 * @param openBet           the amount of chips the player has put into the pot.
 '''
+
+
 def infoPlayerOpen(_playerName, _openBet):
-    print("Player "+ _playerName + " opened, has put "+ _openBet +" chips into the pot.")
+    print("Player " + _playerName + " opened, has put " + _openBet + " chips into the pot.")
+
 
 '''
 * Called when a player checks.
 * @param playerName        the name of the player that checks.
 '''
+
+
 def infoPlayerCheck(_playerName):
-    print("Player "+ _playerName +" checked.")
+    print("Player " + _playerName + " checked.")
+
 
 '''
 * Called when a player raises.
 * @param playerName        the name of the player that raises.
 * @param amountRaisedTo    the amount of chips the player raised to.
 '''
+
+
 def infoPlayerRise(_playerName, _amountRaisedTo):
-    print("Player "+_playerName +" raised to "+ _amountRaisedTo+ " chips.")
+    print("Player " + _playerName + " raised to " + _amountRaisedTo + " chips.")
+
 
 '''
 * Called when a player calls.
 * @param playerName        the name of the player that calls.
 '''
+
+
 def infoPlayerCall(_playerName):
-    print("Player "+_playerName +" called.")
+    print("Player " + _playerName + " called.")
+
 
 '''
 * Called when a player folds.
 * @param playerName        the name of the player that folds.
 '''
+
+
 def infoPlayerFold(_playerName):
-    print("Player "+ _playerName +" folded.")
+    print("Player " + _playerName + " folded.")
+
 
 '''
 * Called when a player goes all-in.
 * @param playerName        the name of the player that goes all-in.
 * @param allInChipCount    the amount of chips the player has in the pot and goes all-in with.
 '''
+
+
 def infoPlayerAllIn(_playerName, _allInChipCount):
-    print("Player "+_playerName +" goes all-in with a pot of "+_allInChipCount+" chips.")
+    print("Player " + _playerName + " goes all-in with a pot of " + _allInChipCount + " chips.")
+
 
 '''
 * Called when a player has exchanged (thrown away and drawn new) cards.
 * @param playerName        the name of the player that has exchanged cards.
 * @param cardCount         the number of cards exchanged.
 '''
+
+
 def infoPlayerDraw(_playerName, _cardCount):
-    print("Player "+ _playerName + " exchanged "+ _cardCount +" cards.")
+    print("Player " + _playerName + " exchanged " + _cardCount + " cards.")
+
 
 '''
 * Called during the showdown when a player shows his hand.
 * @param playerName        the name of the player whose hand is shown.
 * @param hand              the players hand.
 '''
+
+
 def infoPlayerHand(_playerName, _hand):
-    print("Player "+ _playerName +" hand " + str(_hand))
+    print("Player " + _playerName + " hand " + str(_hand))
     global CURRENT_HAND
-    CURRENT_HAND=_hand
+    CURRENT_HAND = _hand
+
+
 '''
 * Called during the showdown when a players undisputed win is reported.
 * @param playerName    the name of the player whose undisputed win is anounced.
 * @param winAmount     the amount of chips the player won.
 '''
+
+
 def infoRoundUndisputedWin(_playerName, _winAmount):
-    print("Player "+ _playerName +" won "+ _winAmount +" chips undisputed.")
+    print("Player " + _playerName + " won " + _winAmount + " chips undisputed.")
+
 
 '''
 * Called during the showdown when a players win is reported. If a player does not win anything,
@@ -294,6 +357,7 @@ def infoRoundUndisputedWin(_playerName, _winAmount):
 * @param playerName    the name of the player whose win is anounced.
 * @param winAmount     the amount of chips the player won.
 '''
-def infoRoundResult(_playerName, _winAmount):
-    print("Player "+ _playerName +" won " + _winAmount + " chips.")
 
+
+def infoRoundResult(_playerName, _winAmount):
+    print("Player " + _playerName + " won " + _winAmount + " chips.")
