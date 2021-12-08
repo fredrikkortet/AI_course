@@ -36,3 +36,4 @@ class Card:
     NUM_SUITS = 4
     NUM_RANKS = 13
     NUM_CARDS = 52
+

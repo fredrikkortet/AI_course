@@ -54,8 +54,8 @@ def evaluate_cards(cards):
         print(Hands[3])
     if x==[1,1,1,1,1]:
         value=[]
-        for i in temprank:
-            value.append(i)
+        for i in cards:
+            value.append(ranks_order(i))
         if max(value)-min(value)==4:
             validhands.append(Hands[4])
             print(Hands[4])
@@ -82,12 +82,12 @@ def card_strength(cards):
     sorted_cards= sorted(cards,key=ranks_order)
     evalu_cards=evaluate_cards(cards)
     strength=0
-    print(cards)
+    print(sorted_cards,"hej")
     card=ranks_order(sorted_cards[0])
     calc_strength=[]
     calc_strength.append(pow(card,4))
     for i in range(0,7):
-        calc_strength.append(calc_strength[i]+pow(sorted_cards[4],4))
+        calc_strength.append(calc_strength[i]+pow(card,4))
 
     strength=calc_strength[Hands.index(evalu_cards)]/highest_strength[Hands.index(evalu_cards)]
     return strength
@@ -124,9 +124,9 @@ def queryOpenAction(_minimumPotAfterOpen, _playersCurrentBet, _playersRemainingC
     print("Player requested to choose an opening action.")
 
     # Random Open Action
-    if winning(pokerGames().CurrentHand)>0.5 and _playersCurrentBet + _playersRemainingChips > _minimumPotAfterOpen:
+    if winning(CURRENT_HAND)>0.5 and _playersCurrentBet + _playersRemainingChips > _minimumPotAfterOpen:
         return ClientBase.BettingAnswer.ACTION_OPEN,  (random.randint(0, 10) + _minimumPotAfterOpen)
-    elif winning(pokerGames().CurrentHand)<0.5 and _playersCurrentBet + _playersRemainingChips > _minimumPotAfterOpen:
+    elif winning(CURRENT_HAND)<0.5 and _playersCurrentBet + _playersRemainingChips > _minimumPotAfterOpen:
         return ClientBase.BettingAnswer.ACTION_OPEN, _minimumPotAfterOpen
     else:
         return ClientBase.BettingAnswer.ACTION_CHECK
@@ -278,7 +278,8 @@ def infoPlayerDraw(_playerName, _cardCount):
 '''
 def infoPlayerHand(_playerName, _hand):
     print("Player "+ _playerName +" hand " + str(_hand))
-
+    global CURRENT_HAND
+    CURRENT_HAND=_hand
 '''
 * Called during the showdown when a players undisputed win is reported.
 * @param playerName    the name of the player whose undisputed win is anounced.
