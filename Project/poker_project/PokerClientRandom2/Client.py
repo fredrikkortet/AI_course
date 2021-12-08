@@ -82,8 +82,10 @@ def card_strength(cards):
     sorted_cards= sorted(cards,key=ranks_order)
     evalu_cards=evaluate_cards(cards)
     strength=0
+    print(cards)
+    card=ranks_order(sorted_cards[0])
     calc_strength=[]
-    calc_strength.append(pow(sorted_cards[4],4))
+    calc_strength.append(pow(card,4))
     for i in range(0,7):
         calc_strength.append(calc_strength[i]+pow(sorted_cards[4],4))
 
@@ -122,9 +124,9 @@ def queryOpenAction(_minimumPotAfterOpen, _playersCurrentBet, _playersRemainingC
     print("Player requested to choose an opening action.")
 
     # Random Open Action
-    if winning(CURRENT_HAND)>0.5 and _playersCurrentBet + _playersRemainingChips > _minimumPotAfterOpen:
+    if winning(pokerGames().CurrentHand)>0.5 and _playersCurrentBet + _playersRemainingChips > _minimumPotAfterOpen:
         return ClientBase.BettingAnswer.ACTION_OPEN,  (random.randint(0, 10) + _minimumPotAfterOpen)
-    elif winning(CURRENT_HAND)<0.5 and _playersCurrentBet + _playersRemainingChips > _minimumPotAfterOpen:
+    elif winning(pokerGames().CurrentHand)<0.5 and _playersCurrentBet + _playersRemainingChips > _minimumPotAfterOpen:
         return ClientBase.BettingAnswer.ACTION_OPEN, _minimumPotAfterOpen
     else:
         return ClientBase.BettingAnswer.ACTION_CHECK
