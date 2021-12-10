@@ -14,7 +14,7 @@ BUFFER_SIZE = 1024
 POKER_CLIENT_NAME = 'Reflex'
 CURRENT_HAND = []
 
-Ranks = ['3', '2', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
+Ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
 
 Suits = ['s', 'h', 'd', 'c']
 
@@ -43,7 +43,7 @@ def change_card(cards):
     if Hands.index(ev_card)==1:
         throw=' '+cards[0]+cards[1]+cards[2]
         return throw
-    return
+    return ''
 
 def evaluate_cards(cards):
     validhands = ['High card']
@@ -76,7 +76,7 @@ def evaluate_cards(cards):
             if set(value) == set(['A', '2', '3', '4', '5']):
                 validhands.append(Hands[4])
                 print(Hands[4], 'with A')
-    if len(tempsuit) == 1:
+    if len(set(tempsuit)) == 1:
         validhands.append(Hands[5])
         print(Hands[5])
     if x == [2, 3]:
@@ -99,9 +99,7 @@ def card_strength(cards):
 
 
 def winning(cards):
-    strength = card_strength(cards)
-    return strength
-
+    return card_strength(cards)
 
 '''
 * Gets the name of the player.
@@ -136,10 +134,8 @@ def queryOpenAction(_minimumPotAfterOpen, _playersCurrentBet, _playersRemainingC
     print("Player requested to choose an opening action.")
 
     winprob = winning(CURRENT_HAND)
-    # Random Open Action
-    print("här är jag i open")
     if winprob > 0.5 and _playersCurrentBet + _playersRemainingChips > _minimumPotAfterOpen + 10:
-        return ClientBase.BettingAnswer.ACTION_OPEN, (random.randint(0, 10) + _minimumPotAfterOpen)
+        return ClientBase.BettingAnswer.ACTION_OPEN, (random.randint(1, 10) + _minimumPotAfterOpen)
     elif winprob > 0.5 and _playersCurrentBet + _playersRemainingChips > _minimumPotAfterOpen:
         return ClientBase.BettingAnswer.ACTION_OPEN, _minimumPotAfterOpen
     else:
@@ -170,15 +166,11 @@ def queryOpenAction(_minimumPotAfterOpen, _playersCurrentBet, _playersRemainingC
 def queryCallRaiseAction(_maximumBet, _minimumAmountToRaiseTo, _playersCurrentBet, _playersRemainingChips):
     print("Player requested to choose a call/raise action.")
     winning_prob = winning(CURRENT_HAND)
-    print("money ", _playersCurrentBet + _playersRemainingChips)
-    print(CURRENT_HAND, " prob ", winning_prob)
-    print("to call ", _maximumBet)
-    print("to call", _minimumAmountToRaiseTo)
-    if winning_prob<0.5 and _maximumBet > _playersCurrentBet + _playersRemainingChips:
+    if winning_prob < 0.5 and _maximumBet > _playersCurrentBet + _playersRemainingChips:
         return ClientBase.BettingAnswer.ACTION_FOLD
     if winning_prob > 0.9:
         return ClientBase.BettingAnswer.ACTION_ALLIN
-    if winning_prob < 0.8 and _playersCurrentBet + _playersRemainingChips > _minimumAmountToRaiseTo:
+    if winning_prob > 0.8 and _playersCurrentBet + _playersRemainingChips > _minimumAmountToRaiseTo:
         return ClientBase.BettingAnswer.ACTION_RAISE, _minimumAmountToRaiseTo + random.randint(0,10)
     return ClientBase.BettingAnswer.ACTION_CALL
 
@@ -195,8 +187,7 @@ def queryCallRaiseAction(_maximumBet, _minimumAmountToRaiseTo, _playersCurrentBe
 
 def queryCardsToThrow(_hand):
     print("Requested information about what cards to throw")
-    print(_hand)
-    return _hand[random.randint(0,4)] + ' '
+    return change_card(_hand)
 
 
 # InfoFunction:
